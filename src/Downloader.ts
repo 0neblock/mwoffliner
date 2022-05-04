@@ -32,6 +32,7 @@ import S3 from './S3';
 import { Dump } from './Dump';
 import logger from './Logger';
 import MediaWiki from './MediaWiki';
+import { filterArticleIdsFromMwRet } from './util/filterArticleIds';
 
 
 const imageminOptions = new Map();
@@ -381,7 +382,7 @@ class Downloader {
     return finalProcessedResp;
   }
 
-  public async getArticleDetailsNS(ns: number, gapcontinue: string = ''): Promise<{ gapContinue: string, articleDetails: QueryMwRet }> {
+  public async getArticleDetailsNS(ns: number, gapcontinue: string = '', articleIdRegexFilter?: RegExp): Promise<{ gapContinue: string, articleDetails: QueryMwRet }> {
     let queryContinuation: QueryContinueOpts;
     let finalProcessedResp: QueryMwRet;
     let gCont: string = null;
@@ -415,6 +416,7 @@ class Downloader {
       Downloader.handleMWWarningsAndErrors(resp);
 
       let processedResponse = normalizeMwResponse(resp.query);
+        processedResponse = filterArticleIdsFromMwRet(processedResponse, articleIdRegexFilter);
 
       gCont = resp['query-continue']?.allpages?.gapcontinue ?? gCont;
 

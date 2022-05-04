@@ -63,7 +63,7 @@ class S3 {
     }
 
     public async downloadBlob(key: string, version = '1'): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             this.s3Handler.getObject({Bucket: this.bucketName, Key: key}, async (err: any, val: any) => {
                 if (val) {
                     if (val.Metadata.version !== version) {
@@ -71,7 +71,7 @@ class S3 {
                     }
                     resolve(val);
                 } else if (err && err.statusCode === 404) {
-                    resolve();
+                    resolve({});
                 } else {
                     reject(err);
                 }

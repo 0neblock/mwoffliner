@@ -17,6 +17,7 @@ import semver from 'semver';
 import * as path from 'path';
 import * as QueryStringParser from 'querystring';
 import { ZimArticle, ZimCreator } from '@openzim/libzim';
+import { languageConfig } from './appended-language-config'
 
 import {
   articleDetailXId,
@@ -319,11 +320,14 @@ async function execute(argv: any) {
     logger.error(`Failed to read articleList from [${articleList}]`, err);
     throw err;
   }
-
+  
+  
+  const filterRegexp = new RegExp(`^(?:${languageConfig.filter(l => l['Language code'] != 'en').map((l) => `(?!^${l['Prefix or namespace']})`).join('')}.)+$`);
+  console.log("regex: " + filterRegexp);
   await mw.getNamespaces(addNamespaces, downloader);
 
   logger.info(`Getting article ids`);
-  await getArticleIds(downloader, mw, mainPage, articleList ? articleListLines : null);
+  await getArticleIds(downloader, mw, mainPage, articleList ? articleListLines : null, filterRegexp);
   if (mw.getCategories) {
     await getCategoriesForArticles(articleDetailXId, downloader, redis);
 
