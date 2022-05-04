@@ -69,16 +69,16 @@ export async function getArticlesByIds(articleIds: string[], downloader: Downloa
     );
 }
 
-export async function getArticlesByNS(ns: number, downloader: Downloader, continueLimit?: number): Promise<void> {
+export async function getArticlesByNS(ns: number, downloader: Downloader, continueLimit?: number, articleIdRegexFilter?: RegExp): Promise<void> {
     let totalArticles = 0;
     let chunk: { articleDetails: QueryMwRet, gapContinue: string };
 
     do {
-        chunk = await downloader.getArticleDetailsNS(ns, chunk && chunk.gapContinue);
+        chunk = await downloader.getArticleDetailsNS(ns, chunk && chunk.gapContinue, articleIdRegexFilter);
 
         await articleDetailXId.setMany(mwRetToArticleDetail(chunk.articleDetails));
 
-        for (const [articleId, articleDetail] of Object.entries(chunk.articleDetails)) {
+        for (let [articleId, articleDetail] of Object.entries(chunk.articleDetails)) {
             await redirectsXId.setMany(
                 (articleDetail.redirects || []).reduce((acc, redirect) => {
                     const rId = redirect.title;
